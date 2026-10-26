@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Puasa Selang-Seling (Daud)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style kustom untuk kalender */
+        .calendar-day-btn {
+            transition: all 0.2s ease;
+        }
+        .calendar-day-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header Section -->
+    <header class="bg-emerald-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-6 text-center">
+            <div class="inline-flex items-center justify-center p-3 bg-emerald-500 rounded-full mb-3 shadow-inner">
+                <i class="fa-solid fa-calendar-check text-2xl text-white"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Jadwal Puasa Selang-Seling</h1>
+            <p class="text-emerald-100 text-sm sm:text-base mt-1">Pelacak Puasa Daud & Jadwal Harian</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow space-y-8">
+
+        <!-- Date Picker & Primary Status Display Section -->
+        <section class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100 flex flex-col items-center">
+            
+            <!-- Date Input Form -->
+            <div class="w-full max-w-md text-center mb-6">
+                <label for="date-select" class="block text-sm font-semibold text-slate-600 mb-2">
+                    <i class="fa-regular fa-calendar-days mr-1 text-emerald-600"></i> Pilih Tanggal Check:
+                </label>
+                <div class="flex items-center justify-center gap-2">
+                    <input type="date" id="date-select" class="w-full text-center px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium text-slate-700 shadow-sm transition">
+                    <button id="btn-today" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition text-sm whitespace-nowrap shadow-sm">
+                        Hari Ini
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Result Card -->
+            <div id="status-card" class="w-full max-w-md rounded-2xl p-6 sm:p-8 text-center transition-all duration-300 transform shadow-md">
+                <div id="status-icon-container" class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 shadow-sm">
+                    <!-- Icon disuntikkan via JS -->
+                </div>
+                <p id="formatted-date-text" class="text-xs uppercase tracking-wider font-bold opacity-80 mb-1"></p>
+                <h2 id="status-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2"></h2>
+                <p id="status-desc" class="text-sm sm:text-base font-medium opacity-90"></p>
+            </div>
+
+        </section>
+
+        <!-- Calendar View Section -->
+        <section class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-emerald-600"></i> Kalender Bulanan
+                </h3>
+                
+                <!-- Calendar Month Navigation Controls -->
+                <div class="flex items-center gap-3">
+                    <button id="prev-month" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span id="calendar-month-year" class="font-bold text-slate-700 min-w-[130px] text-center"></span>
+                    <button id="next-month" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Legend Info -->
+            <div class="flex items-center justify-center gap-6 mb-6 text-xs sm:text-sm font-medium text-slate-600 bg-slate-50 py-2.5 rounded-xl border border-slate-100">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <span>Puasa</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-slate-300"></span>
+                    <span>Tidak Puasa</span>
+                </div>
+            </div>
+
+            <!-- Calendar Grid Layout -->
+            <div class="grid grid-cols-7 gap-1 text-center font-semibold text-xs sm:text-sm text-slate-400 mb-2">
+                <div>Min</div>
+                <div>Sen</div>
+                <div>Sel</div>
+                <div>Rab</div>
+                <div>Kam</div>
+                <div>Jum</div>
+                <div>Sab</div>
+            </div>
+
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+                <!-- Grid hari diisi secara dinamis oleh JS -->
+            </div>
+        </section>
+
+        <!-- Information / Explanation Box -->
+        <section class="bg-emerald-50/60 rounded-2xl p-6 border border-emerald-100/80 text-emerald-900">
+            <div class="flex items-start gap-4">
+                <div class="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl mt-0.5">
+                    <i class="fa-solid fa-circle-info text-xl"></i>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="font-bold text-base text-emerald-950">Aturan Patokan Penjadwalan</h4>
+                    <p class="text-sm text-emerald-800 leading-relaxed">
+                        Aplikasi ini dikalkulasi secara otomatis berpatokan pada <strong>26 Oktober 2026 (Hari Puasa)</strong>. Pola puasa dihitung bergantian secara konsisten: 1 hari puasa, 1 hari tidak puasa.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <p>Aplikasi Pelacak Jadwal Puasa Daud &bull; Siap Di-upload ke GitHub Pages</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- KONFIGURASI DAN BASE DATE ---
+        // Base Date: 26 Oktober 2026 di mana statusnya adalah "Puasa" (00:00:00 UTC)
+        const BASE_DATE = new Date(2026, 9, 26); // Bulan di JS dimulai dari 0 (9 = Oktober)
+        BASE_DATE.setHours(0, 0, 0, 0);
+
+        // State global untuk tanggal yang sedang diproses
+        let selectedDate = new Date();
+        selectedDate.setHours(0, 0, 0, 0);
+
+        let currentCalendarDate = new Date(selectedDate);
+
+        // Element DOM Reference
+        const dateInput = document.getElementById('date-select');
+        const btnToday = document.getElementById('btn-today');
+        const statusCard = document.getElementById('status-card');
+        const statusIconContainer = document.getElementById('status-icon-container');
+        const formattedDateText = document.getElementById('formatted-date-text');
+        const statusTitle = document.getElementById('status-title');
+        const statusDesc = document.getElementById('status-desc');
+        
+        const calendarGrid = document.getElementById('calendar-grid');
+        const calendarMonthYear = document.getElementById('calendar-month-year');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+
+        /**
+         * Menghitung status puasa berdasarkan selisih hari dari Base Date.
+         * @param {Date} date - Tanggal yang ingin dicek
+         * @returns {boolean} - true jika "Puasa", false jika "Tidak Puasa"
+         */
+        function isFastingDay(targetDate) {
+            const checkDate = new Date(targetDate);
+            checkDate.setHours(0, 0, 0, 0);
+
+            // Hitung selisih waktu dalam milidetik dan konversi ke hari
+            const diffTime = checkDate.getTime() - BASE_DATE.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+
+            // Jika selisih genap (misal 0, 2, -2, dll) = Puasa
+            // Jika selisih ganjil (misal 1, -1, 3, dll) = Tidak Puasa
+            return Math.abs(diffDays % 2) === 0;
+        }
+
+        /**
+         * Mengubah format tanggal menjadi teks bahasa Indonesia yang rapi.
+         */
+        function formatDateIndonesian(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        /**
+         * Update Tampilan Kartu Utama
+         */
+        function updateStatusUI(date) {
+            const fasting = isFastingDay(date);
+            
+            // Format Tanggal
+            formattedDateText.textContent = formatDateIndonesian(date);
+
+            if (fasting) {
+                // Tampilan Puasa (Hijau / Emerald)
+                statusCard.className = "w-full max-w-md rounded-2xl p-6 sm:p-8 text-center transition-all duration-300 transform shadow-md bg-emerald-500 text-white border border-emerald-400";
+                statusIconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 bg-white text-emerald-600 shadow-sm";
+                statusIconContainer.innerHTML = '<i class="fa-solid fa-utensils-slash"></i>';
+                statusTitle.textContent = "PUASA";
+                statusDesc.textContent = "Hari ini jadwalnya berpuasa. Semangat menjalankan ibadah!";
+            } else {
+                // Tampilan Tidak Puasa (Biru / Slate)
+                statusCard.className = "w-full max-w-md rounded-2xl p-6 sm:p-8 text-center transition-all duration-300 transform shadow-md bg-slate-700 text-white border border-slate-600";
+                statusIconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 bg-slate-800 text-slate-300 shadow-sm";
+                statusIconContainer.innerHTML = '<i class="fa-solid fa-bowl-rice"></i>';
+                statusTitle.textContent = "TIDAK PUASA";
+                statusDesc.textContent = "Hari ini jadwal tidak berpuasa (hari berbuka). Jaga kesehatan!";
+            }
+        }
+
+        /**
+         * Rendernya tampilan kalender bulanan
+         */
+        function renderCalendar(year, month) {
+            calendarGrid.innerHTML = '';
+            
+            const monthNames = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+
+            calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+            // Hari pertama dari bulan
+            const firstDay = new Date(year, month, 1).getDay();
+            // Total hari dalam bulan
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Slot kosong sebelum hari pertama
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "h-10 sm:h-12";
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Render setiap hari di bulan
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDate = new Date(year, month, day);
+                const fasting = isFastingDay(dayDate);
+                
+                // Cek apakah hari ini merupakan hari yang di-select
+                const isSelected = dayDate.toDateString() === selectedDate.toDateString();
+
+                const dayButton = document.createElement('button');
+                dayButton.type = 'button';
+                
+                let bgClasses = fasting 
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100" 
+                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+                
+                if (isSelected) {
+                    bgClasses += " ring-2 ring-emerald-600 font-bold shadow-sm";
+                }
+
+                dayButton.className = `calendar-day-btn h-10 sm:h-12 rounded-xl border flex flex-col items-center justify-center relative p-1 ${bgClasses}`;
+                
+                // Angka Tanggal
+                const dayNumber = document.createElement('span');
+                dayNumber.className = "text-xs sm:text-sm font-semibold";
+                dayNumber.textContent = day;
+                dayButton.appendChild(dayNumber);
+
+                // Indikator Titik Status
+                const dot = document.createElement('span');
+                dot.className = `w-1.5 h-1.5 rounded-full mt-0.5 ${fasting ? 'bg-emerald-500' : 'bg-slate-400'}`;
+                dayButton.appendChild(dot);
+
+                // Listener ketika tanggal diklik di kalender
+                dayButton.addEventListener('click', () => {
+                    selectedDate = new Date(year, month, day);
+                    selectedDate.setHours(0, 0, 0, 0);
+                    
+                    // Sync input date
+                    dateInput.value = formatDateForInput(selectedDate);
+                    
+                    // Render ulang status & kalender
+                    updateStatusUI(selectedDate);
+                    renderCalendar(year, month);
+                });
+
+                calendarGrid.appendChild(dayButton);
+            }
+        }
+
+        /**
+         * Helper mengonversi Date object ke format 'YYYY-MM-DD' untuk input HTML
+         */
+        function formatDateForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Ketika input tanggal diubah
+        dateInput.addEventListener('change', (e) => {
+            if (e.target.value) {
+                const parts = e.target.value.split('-');
+                selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                selectedDate.setHours(0, 0, 0, 0);
+
+                currentCalendarDate = new Date(selectedDate);
+
+                updateStatusUI(selectedDate);
+                renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            }
+        });
+
+        // Tombol Kembali ke Hari Ini
+        btnToday.addEventListener('click', () => {
+            selectedDate = new Date();
+            selectedDate.setHours(0, 0, 0, 0);
+
+            dateInput.value = formatDateForInput(selectedDate);
+            currentCalendarDate = new Date(selectedDate);
+
+            updateStatusUI(selectedDate);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+        });
+
+        // Navigasi Bulan Kalender
+        prevMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+        });
+
+        // --- INISIALISASI HALAMAN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set input date ke hari ini
+            dateInput.value = formatDateForInput(selectedDate);
+
+            // Render tampilan awal
+            updateStatusUI(selectedDate);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+        });
+    </script>
+</body>
+</html>
